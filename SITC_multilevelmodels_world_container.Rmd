@@ -32,7 +32,10 @@ library(beepr)
 #sanctions.data$YearID <- as.numeric(as.ordered(sanctions.data$year))
 
 #sanctions.data.all <- read.csv("sanctbust_allcountries.csv")
-sanctions.data.all <- read.csv("https://www.dropbox.com/s/8bb57h5g3nk7o7x/sanctbust_allcountries.csv?dl=0")
+
+# to read data from Dropbox folder copy shared link and change dl=0 to dl=1
+sanctions.data.all <- read.csv("https://www.dropbox.com/s/8bb57h5g3nk7o7x/sanctbust_allcountries.csv?dl=1")
+
 sanctions.data.all$YearID <- as.numeric(as.ordered(sanctions.data.all$year))
 
 
