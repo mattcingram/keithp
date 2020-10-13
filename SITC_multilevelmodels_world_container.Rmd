@@ -1,0 +1,823 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r LOAD PACKAGES, include=FALSE}
+
+#packages
+library(ggplot2)
+library(mcmcplots)
+library(tidyverse)
+library(lme4)
+library(arm)
+library(lattice)
+library(rpart)
+library(broom)
+library(broom.mixed)
+library(modelsummary)
+library(beepr)
+```
+
+```{r}
+#Set Working Directory
+#setwd("~/Dropbox/ICPSR/Intro to Bayesian")
+```
+
+```{r}
+#Load Data Set
+#setwd("~/Dropbox/ICPSR/Intro to Bayesian")
+
+#sanctions.data <- read.csv("sanctbust_newfixed")
+
+#sanctions.data$YearID <- as.numeric(as.ordered(sanctions.data$year))
+
+sanctions.data.all <- read.csv("sanctbust_allcountries.csv")
+sanctions.data.all$YearID <- as.numeric(as.ordered(sanctions.data.all$year))
+
+
+```
+
+```{r RESCALE VARIABLES TO IMPROVE MODEL CONVERGENCE FOR GLMER}
+
+pvars0 <- c("lndist", "duration", "lagtradeopenP", "lnlaggdpp", "lnlaggdpt", "lagtradesharePT", "nobust", "nobustsq", "nobustcb", "nobust0", "nobust0sq", "nobust0cb", "lagtradecontrol0", "lagtradeshare0100", "lagtradeshare1100", "lagtradeshare2100", "lagtradecontrol1", "nobust1", "nobust1sq", "nobust1cb", "lagtradecontrol2", "nobust2", "nobust2sq", "nobust2cb", "lagtradeshare3100", "lagtradecontrol3", "nobust3", "nobust3sq", "nobust3cb", "lagtradeshare4100", "lagtradecontrol4", "nobust4", "nobust4sq", "nobust4cb", "lagtradeshare5100", "lagtradeshare6100", "lagtradeshare9100", "lagtradeshare8100", "lagtradeshare7100", "lagtradecontrol5", "lagtradecontrol6", "lagtradecontrol7", "lagtradecontrol8", "lagtradecontrol9", "nobust5", "nobust5sq", "nobust5cb", "nobust6", "nobust6sq", "nobust6cb", "nobust7", "nobust7sq", "nobust7cb", "nobust8", "nobust8sq", "nobust8cb", "nobust9", "nobust9sq", "nobust9cb", "JointDem", "DefPactPT", "Dem_3P", "Dem_T")
+
+sanctions.data.all.scaled <- sanctions.data.all
+sanctions.data.all.scaled [pvars0] <- lapply(sanctions.data.all.scaled[pvars0], function(x) as.numeric(scale(x), na.omit(TRUE)))
+
+#sanctions.data.all.scaled$DefPactPT <- as.factor(sanctions.data.all.scaled$DefPactPT) 
+#sanctions.data.all.scaled$tradedeficit0 <- as.factor(sanctions.data.all.scaled$tradedeficit0)
+
+rm(sanctions.data.all)
+```
+
+```{r eval=FALSE, include=FALSE}
+#Unconditional Models
+
+#Aggregate Trade
+multi.sanctions.bust.unc <- glmer(allbuster ~  (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+                                     nAGQ=1,control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+beep()
+summary(multi.sanctions.bust.unc)
+
+multi.sanctions.bust0.unc <- glmer(allbuster0_new ~ (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+                                     nAGQ=1,control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+beep()
+summary(multi.sanctions.bust0.unc)
+
+multi.sanctions.bust1.unc <- glmer(allbuster1_new ~ (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+                                     nAGQ=1,control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+beep()
+summary(multi.sanctions.bust1.unc)
+
+multi.sanctions.bust2.unc <- glmer(allbuster2_new ~ (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+                                     nAGQ=1,control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+beep()
+summary(multi.sanctions.bust2.unc)
+
+multi.sanctions.bust3.unc <- glmer(allbuster3_new ~ (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+                                     nAGQ=1,control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+beep()
+summary(multi.sanctions.bust3.unc)
+
+multi.sanctions.bust4.unc <- glmer(allbuster4_new ~ (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+                                     nAGQ=1,control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+beep()
+summary(multi.sanctions.bust4.unc)
+
+
+multi.sanctions.bust5.unc <- glmer(allbuster5_new ~ (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+                                     nAGQ=1,control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+beep()
+summary(multi.sanctions.bust5.unc)
+
+multi.sanctions.bust6.unc <- glmer(allbuster6_new ~ (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+                                     nAGQ=1,control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+beep()
+summary(multi.sanctions.bust6.unc)
+
+multi.sanctions.bust7.unc <- glmer(allbuster7_new ~ (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+                                     nAGQ=1,control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+beep()
+summary(multi.sanctions.bust7.unc)
+
+multi.sanctions.bust8.unc <- glmer(allbuster8_new ~ (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+                                     nAGQ=1,control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+beep()
+summary(multi.sanctions.bust8.unc)
+
+multi.sanctions.bust9.unc <- glmer(allbuster9_new ~ (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+                                     nAGQ=1,control=glmerControl(optimizer="bobyqa",optCtrl=list(maxfun=2e5)))
+
+beep()
+summary(multi.sanctions.bust9.unc)
+
+library(sjPlot)
+table1 <- tab_model(multi.sanctions.bust0.unc, multi.sanctions.bust1.unc, multi.sanctions.bust2.unc, multi.sanctions.bust3.unc, multi.sanctions.bust4.unc, multi.sanctions.bust5.unc, multi.sanctions.bust6.unc, multi.sanctions.bust7.unc, multi.sanctions.bust8.unc, multi.sanctions.bust9.unc, show.ci = FALSE, show.se = TRUE, transform = NULL, collapse.se = TRUE, show.p = FALSE, p.style = "stars", show.r2 = FALSE, show.re.var = TRUE, show.aic = TRUE)
+
+table1
+```
+
+
+```{r}
+#Aggregate model
+
+algoptions <- c("NLOPT_LN_PRAXIS", "NLOPT_GN_CRS2_LM",
+"NLOPT_LN_COBYLA", "NLOPT_LN_NEWUOA",
+"NLOPT_LN_NEWUOA_BOUND", "NLOPT_LN_NELDERMEAD",
+"NLOPT_LN_SBPLX", "NLOPT_LN_BOBYQA")
+
+for(i in 1:length(algoptions)){
+  multi.sanctions.bust.all <- glmer(allbuster ~ lagtradeopenP  + lnlaggdpp + lnlaggdpt + lagtradesharePT + duration + lndist  + Dem_3P + Dem_T + JointDem + DefPactPT + nobust0 + nobust0sq + nobust0cb +  (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+glmerControl(optimizer = "nloptwrap", optCtrl = list(algorithm = algoptions[i],
+                                                          maxeval = 1e7,
+                                                          xtol_abs = 1e-9,
+                                                          ftol_abs = 1e-9)))
+  if(is.null(multi.sanctions.bust.all@optinfo$conv$lme4$messages)){
+    print(paste0("One of the nloptwrap options, ", algoptions[i],", worked!"))
+    print(summary(multi.sanctions.bust.all))
+    break
+  }
+}
+
+multi.sanctions.bust.all
+beep()
+
+#write.csv(multi.sanctions.bust0.full@frame, "C:/Users/polis/Dropbox/ICPSR/Intro to Bayesian/esample.csv", row.names = FALSE)
+```
+
+```{r}
+algoptions <- c("NLOPT_LN_PRAXIS", "NLOPT_GN_CRS2_LM",
+"NLOPT_LN_COBYLA", "NLOPT_LN_NEWUOA",
+"NLOPT_LN_NEWUOA_BOUND", "NLOPT_LN_NELDERMEAD",
+"NLOPT_LN_SBPLX", "NLOPT_LN_BOBYQA")
+
+for(i in 1:length(algoptions)){
+  multi.sanctions.bust0.all <- glmer(allbuster0_new ~ lagtradeopenP  + lnlaggdpp + lnlaggdpt + lagtradeshare0100 + duration + lndist + lagtradecontrol0 + Dem_3P + Dem_T + JointDem + DefPactPT + nobust0 + nobust0sq + nobust0cb +  (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+glmerControl(optimizer = "nloptwrap", optCtrl = list(algorithm = algoptions[i],
+                                                          maxeval = 1e7,
+                                                          xtol_abs = 1e-9,
+                                                          ftol_abs = 1e-9)))
+  if(is.null(multi.sanctions.bust0.all@optinfo$conv$lme4$messages)){
+    print(paste0("One of the nloptwrap options, ", algoptions[i],", worked!"))
+    print(summary(multi.sanctions.bust0.all))
+    break
+  }
+}
+
+multi.sanctions.bust0.all
+beep()
+```
+
+
+```{r}
+#read.out.zero <- allFit(multi.sanctions.bust0.all)
+#read.out.zero
+
+#write.csv(multi.sanctions.bust0.full@frame, "C:/Users/polis/Dropbox/ICPSR/Intro to Bayesian/esample.csv", row.names = FALSE)
+```
+
+
+```{r}
+#SITC 1
+
+algoptions <- c("NLOPT_LN_PRAXIS", "NLOPT_GN_CRS2_LM",
+"NLOPT_LN_COBYLA", "NLOPT_LN_NEWUOA",
+"NLOPT_LN_NEWUOA_BOUND", "NLOPT_LN_NELDERMEAD",
+"NLOPT_LN_SBPLX", "NLOPT_LN_BOBYQA")
+
+for(i in 1:length(algoptions)){
+  multi.sanctions.bust1.all <- glmer(allbuster1_new ~ lagtradeopenP  + lnlaggdpp + lnlaggdpt + lagtradeshare1100 + duration + lndist + lagtradecontrol1 + Dem_3P + Dem_T + JointDem + DefPactPT + nobust1 + nobust1sq + nobust1cb +  (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+glmerControl(optimizer = "nloptwrap", optCtrl = list(algorithm = algoptions[i],
+                                                          maxeval = 1e7,
+                                                          xtol_abs = 1e-9,
+                                                          ftol_abs = 1e-9)))
+  if(is.null(multi.sanctions.bust1.all@optinfo$conv$lme4$messages)){
+    print(paste0("One of the nloptwrap options, ", algoptions[i],", worked!"))
+    print(summary(multi.sanctions.bust1.all))
+    break
+  }
+}
+
+multi.sanctions.bust1.all
+beep()
+
+#write.csv(multi.sanctions.bust0.full@frame, "C:/Users/polis/Dropbox/ICPSR/Intro to Bayesian/esample.csv", row.names = FALSE)
+```
+
+
+```{r}
+#SITC 2
+
+algoptions <- c("NLOPT_LN_PRAXIS", "NLOPT_GN_CRS2_LM",
+"NLOPT_LN_COBYLA", "NLOPT_LN_NEWUOA",
+"NLOPT_LN_NEWUOA_BOUND", "NLOPT_LN_NELDERMEAD",
+"NLOPT_LN_SBPLX", "NLOPT_LN_BOBYQA")
+
+for(i in 1:length(algoptions)){
+  multi.sanctions.bust2.all <- glmer(allbuster2_new ~ lagtradeopenP  + lnlaggdpp + lnlaggdpt + lagtradeshare2100 + duration + lndist + lagtradecontrol2 + Dem_3P + Dem_T + JointDem + DefPactPT + nobust2 + nobust2sq + nobust2cb +  (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+glmerControl(optimizer = "nloptwrap", optCtrl = list(algorithm = algoptions[i],
+                                                          maxeval = 1e7,
+                                                          xtol_abs = 1e-9,
+                                                          ftol_abs = 1e-9)))
+  if(is.null(multi.sanctions.bust2.all@optinfo$conv$lme4$messages)){
+    print(paste0("One of the nloptwrap options, ", algoptions[i],", worked!"))
+    print(summary(multi.sanctions.bust2.all))
+    break
+  }
+}
+
+multi.sanctions.bust2.all
+beep()
+```
+
+```{r}
+#read.out.two <- allFit(multi.sanctions.bust2.all, maxfun = 1e5)
+#read.out.two
+#write.csv(multi.sanctions.bust0.full@frame, "C:/Users/polis/Dropbox/ICPSR/Intro to Bayesian/esample.csv", row.names = FALSE)
+```
+
+```{r}
+#SITC 3
+
+algoptions <- c("NLOPT_LN_PRAXIS", "NLOPT_GN_CRS2_LM",
+"NLOPT_LN_COBYLA", "NLOPT_LN_NEWUOA",
+"NLOPT_LN_NEWUOA_BOUND", "NLOPT_LN_NELDERMEAD",
+"NLOPT_LN_SBPLX", "NLOPT_LN_BOBYQA")
+
+for(i in 1:length(algoptions)){
+  multi.sanctions.bust3.all <- glmer(allbuster3_new ~ lagtradeopenP  + lnlaggdpp + lnlaggdpt + lagtradeshare3100 + duration + lndist + lagtradecontrol3 + Dem_3P + Dem_T + JointDem + DefPactPT + nobust3 + nobust3sq + nobust3cb +  (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+glmerControl(optimizer = "nloptwrap", optCtrl = list(algorithm = algoptions[i],
+                                                          maxeval = 1e7,
+                                                          xtol_abs = 1e-9,
+                                                          ftol_abs = 1e-9)))
+  if(is.null(multi.sanctions.bust3.all@optinfo$conv$lme4$messages)){
+    print(paste0("One of the nloptwrap options, ", algoptions[i],", worked!"))
+    print(summary(multi.sanctions.bust3.all))
+    break
+  }
+}
+
+multi.sanctions.bust3.all
+beep()
+
+```
+
+```{r}
+#SITC 4
+
+algoptions <- c("NLOPT_LN_PRAXIS", "NLOPT_GN_CRS2_LM",
+"NLOPT_LN_COBYLA", "NLOPT_LN_NEWUOA",
+"NLOPT_LN_NEWUOA_BOUND", "NLOPT_LN_NELDERMEAD",
+"NLOPT_LN_SBPLX", "NLOPT_LN_BOBYQA")
+
+for(i in 1:length(algoptions)){
+  multi.sanctions.bust4a.all <- glmer(allbuster4_new ~ lagtradeopenP  + lnlaggdpp + lnlaggdpt + lagtradeshare4100 + duration + lndist + lagtradecontrol4 + Dem_3P + Dem_T + JointDem + DefPactPT + nobust4 + nobust4sq + nobust4cb +  (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+glmerControl(optimizer = "nloptwrap", optCtrl = list(algorithm = algoptions[i],
+                                                          maxeval = 1e7,
+                                                          xtol_abs = 1e-9,
+                                                          ftol_abs = 1e-9)))
+  if(is.null(multi.sanctions.bust4a.all@optinfo$conv$lme4$messages)){
+    print(paste0("One of the nloptwrap options, ", algoptions[i],", worked!"))
+    print(summary(multi.sanctions.bust4a.all))
+    break
+  }
+}
+
+multi.sanctions.bust4a.all
+beep()
+```
+
+```{r}
+optimx_options <- c("L-BFGS-B", "nlminb", "nlm", "bobyqa", "nmkb", "hjkb")
+
+for(i in 1:length(optimx_options)){
+ multi.sanctions.bust4b.all <- glmer(allbuster4_new ~ lagtradeopenP  + lnlaggdpp + lnlaggdpt + lagtradeshare4100 + duration + lndist + lagtradecontrol4 + nobust4 + nobust4sq + nobust4cb +  (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+                     control = glmerControl(optimizer = "optimx",
+                                           optCtrl = list(method = optimx_options[i],
+                                                               maxit = 1e9)))
+  if(is.null(multi.sanctions.bust4b.all@optinfo$conv$lme4$messages)){
+    print(paste0("One of the optimx options, ", optimx_options[i],", worked!"))
+    print(summary(multi.sanctions.bust4b.all))
+    break
+  }
+}
+beep()
+```
+
+```{r}
+#read.out4 <- allFit(multi.sanctions.bust4.all)
+
+#write.csv(multi.sanctions.bust0.full@frame, "C:/Users/polis/Dropbox/ICPSR/Intro to Bayesian/esample.csv", row.names = FALSE)
+```
+
+```{r}
+#SITC 5
+
+algoptions <- c("NLOPT_LN_PRAXIS", "NLOPT_GN_CRS2_LM",
+"NLOPT_LN_COBYLA", "NLOPT_LN_NEWUOA",
+"NLOPT_LN_NEWUOA_BOUND", "NLOPT_LN_NELDERMEAD",
+"NLOPT_LN_SBPLX", "NLOPT_LN_BOBYQA")
+
+for(i in 1:length(algoptions)){
+  multi.sanctions.bust5.all <- glmer(allbuster5_new ~ lagtradeopenP  + lnlaggdpp + lnlaggdpt + lagtradeshare5100 + duration + lndist + lagtradecontrol5 + Dem_3P + Dem_T + JointDem + DefPactPT + nobust5 + nobust5sq + nobust5cb +  (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+glmerControl(optimizer = "nloptwrap", optCtrl = list(algorithm = algoptions[i],
+                                                          maxeval = 1e7,
+                                                          xtol_abs = 1e-9,
+                                                          ftol_abs = 1e-9)))
+  if(is.null(multi.sanctions.bust5.all@optinfo$conv$lme4$messages)){
+    print(paste0("One of the nloptwrap options, ", algoptions[i],", worked!"))
+    print(summary(multi.sanctions.bust5.all))
+    break
+  }
+}
+
+multi.sanctions.bust5.all
+beep()
+```
+
+```{r}
+#SITC6
+
+algoptions <- c("NLOPT_LN_PRAXIS", "NLOPT_GN_CRS2_LM",
+"NLOPT_LN_COBYLA", "NLOPT_LN_NEWUOA",
+"NLOPT_LN_NEWUOA_BOUND", "NLOPT_LN_NELDERMEAD",
+"NLOPT_LN_SBPLX", "NLOPT_LN_BOBYQA")
+
+for(i in 1:length(algoptions)){
+  multi.sanctions.bust6.all <- glmer(allbuster6_new ~ lagtradeopenP  + lnlaggdpp + lnlaggdpt + lagtradeshare6100 + duration + lndist + lagtradecontrol6 +  Dem_3P + Dem_T + JointDem + DefPactPT + nobust6 + nobust6sq + nobust6cb +  (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+glmerControl(optimizer = "nloptwrap", optCtrl = list(algorithm = algoptions[i],
+                                                         maxeval = 1e7,
+                                                          xtol_abs = 1e-9,
+                                                          ftol_abs = 1e-9)))
+  if(is.null(multi.sanctions.bust6.all@optinfo$conv$lme4$messages)){
+    print(paste0("One of the nloptwrap options, ", algoptions[i],", worked!"))
+    print(summary(multi.sanctions.bust6.all))
+    break
+  }
+}
+
+multi.sanctions.bust6.all
+beep()
+```
+
+```{r}
+optimx_options <- c("L-BFGS-B", "nlminb", "nlm", "bobyqa", "nmkb", "hjkb")
+
+for(i in 1:length(optimx_options)){
+multi.sanctions.bust6.all <- glmer(allbuster6_new ~ lagtradeopenP  + lnlaggdpp + lnlaggdpt + lagtradeshare6100 + duration +  lndist + lagtradecontrol6 +  Dem_3P + Dem_T + JointDem + DefPactPT + nobust6 + nobust6sq + nobust6cb +  (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+                     control = glmerControl(optimizer = "optimx",
+                                           optCtrl = list(method = optimx_options[i],
+                                                               maxit = 1e9)))
+  if(is.null(multi.sanctions.bust6.all@optinfo$conv$lme4$messages)){
+    print(paste0("One of the optimx options, ", optimx_options[i],", worked!"))
+    print(summary(multi.sanctions.bust6.all))
+    break
+  }
+}
+beep()
+
+```
+
+```{r}
+#SITC 7
+
+algoptions <- c("NLOPT_LN_PRAXIS", "NLOPT_GN_CRS2_LM",
+"NLOPT_LN_COBYLA", "NLOPT_LN_NEWUOA",
+"NLOPT_LN_NEWUOA_BOUND", "NLOPT_LN_NELDERMEAD",
+"NLOPT_LN_SBPLX", "NLOPT_LN_BOBYQA")
+
+for(i in 1:length(algoptions)){
+  multi.sanctions.bust7.all <- glmer(allbuster7_new ~ lagtradeopenP  + lnlaggdpp + lnlaggdpt + lagtradeshare7100 + duration + lndist + lagtradecontrol7 + Dem_3P + Dem_T + JointDem + DefPactPT + nobust7 + nobust7sq + nobust7cb +  (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+glmerControl(optimizer = "nloptwrap", optCtrl = list(algorithm = algoptions[i],
+                                                          maxeval = 1e7,
+                                                          xtol_abs = 1e-9,
+                                                          ftol_abs = 1e-9)))
+  if(is.null(multi.sanctions.bust7.all@optinfo$conv$lme4$messages)){
+    print(paste0("One of the nloptwrap options, ", algoptions[i],", worked!"))
+    print(summary(multi.sanctions.bust7.all))
+    break
+  }
+}
+
+multi.sanctions.bust7.all
+beep()
+
+```
+
+```{r}
+#SITC 8
+
+algoptions <- c("NLOPT_LN_PRAXIS", "NLOPT_GN_CRS2_LM",
+"NLOPT_LN_COBYLA", "NLOPT_LN_NEWUOA",
+"NLOPT_LN_NEWUOA_BOUND", "NLOPT_LN_NELDERMEAD",
+"NLOPT_LN_SBPLX", "NLOPT_LN_BOBYQA")
+
+for(i in 1:length(algoptions)){
+  multi.sanctions.bust8.all <- glmer(allbuster8_new ~ lagtradeopenP  + lnlaggdpp + lnlaggdpt + lagtradeshare8100 + duration + lndist + lagtradecontrol8 + Dem_3P + Dem_T + JointDem + DefPactPT + nobust8 + nobust8sq + nobust8cb +  (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+glmerControl(optimizer = "nloptwrap", optCtrl = list(algorithm = algoptions[i],
+                                                          maxeval = 1e7,
+                                                          xtol_abs = 1e-9,
+                                                          ftol_abs = 1e-9)))
+  if(is.null(multi.sanctions.bust8.all@optinfo$conv$lme4$messages)){
+    print(paste0("One of the nloptwrap options, ", algoptions[i],", worked!"))
+    print(summary(multi.sanctions.bust8.all))
+    break
+  }
+}
+
+multi.sanctions.bust8.all
+beep()
+
+```
+
+```{r}
+#SITC 9
+
+algoptions <- c("NLOPT_LN_PRAXIS", "NLOPT_GN_CRS2_LM",
+"NLOPT_LN_COBYLA", "NLOPT_LN_NEWUOA",
+"NLOPT_LN_NEWUOA_BOUND", "NLOPT_LN_NELDERMEAD",
+"NLOPT_LN_SBPLX", "NLOPT_LN_BOBYQA")
+
+for(i in 1:length(algoptions)){
+  multi.sanctions.bust9.all <- glmer(allbuster9_new ~ lagtradeopenP  + lnlaggdpp + lnlaggdpt + lagtradeshare9100 + duration + lndist + lagtradecontrol9 + Dem_3P + Dem_T + JointDem + DefPactPT + nobust9 + nobust9sq + nobust9cb +  (1 | partnercode)  + (1 | caseid),
+                                      data=sanctions.data.all.scaled, family=binomial(link="logit"),
+glmerControl(optimizer = "nloptwrap", optCtrl = list(algorithm = algoptions[i],
+                                                          maxeval = 1e7,
+                                                          xtol_abs = 1e-9,
+                                                          ftol_abs = 1e-9)))
+  if(is.null(multi.sanctions.bust9.all@optinfo$conv$lme4$messages)){
+    print(paste0("One of the nloptwrap options, ", algoptions[i],", worked!"))
+    print(summary(multi.sanctions.bust9.all))
+    break
+  }
+}
+
+multi.sanctions.bust9.all
+beep()
+```
+
+```{r}
+library(margins)
+
+#Calculate the marginal effects for all variables across all nine-models
+margins0 <- margins(multi.sanctions.bust0.all)
+margins0
+margins1 <- margins(multi.sanctions.bust1.all)
+margins1
+margins2 <- margins(multi.sanctions.bust2.all)
+margins2
+margins3 <- margins(multi.sanctions.bust3.all)
+margins3
+margins4 <- margins(multi.sanctions.bust4a.all)
+margins4
+margins5 <- margins(multi.sanctions.bust5.all)
+margins5
+margins6 <- margins(multi.sanctions.bust6.all)
+margins6
+margins7 <- margins(multi.sanctions.bust7.all)
+margins7
+margins8 <- margins(multi.sanctions.bust8.all)
+margins8
+margins9 <- margins(multi.sanctions.bust9.all)
+margins9
+
+margins0
+margins1
+margins2
+margins3
+margins4
+margins5
+margins6
+margins7
+margins8
+margins9
+
+beep()
+
+```
+
+```{r}
+#Generating Figures - SITC 0
+#Create tmpdat for predicted probability graphs
+tmpdat <- multi.sanctions.bust0.all@frame[, c("caseid", "lndist", "lnlaggdpt", "duration", "lagtradeshare0100",
+                                          "partnercode", "lnlaggdpp", "lagtradeopenP", "JointDem", "DefPactPT", "Dem_T", 
+                                          "Dem_3P", "lagtradecontrol0", "nobust0", "nobust0sq", "nobust0cb")]
+
+library(merTools)
+#Use this data to compute all the graphs using all data as observed
+#newData <- tmpdat
+
+newData_avg <- draw(multi.sanctions.bust0.all, type = "average")
+newData_avg <- wiggle(newData_avg, var = "lagtradeshare0100", 
+                  valueslist = list(unique(tmpdat$lagtradeshare0100)))
+
+#Bootstrap the Prediction Intervals and Predicted Probabilities
+plotdf <- predictInterval(multi.sanctions.bust0.all, newdata = newData_avg, type = "probability", 
+            stat = "mean", n.sims = 20000, level = 0.95, which = "full", seed = 234, include.resid.var = FALSE)
+plotdf <- cbind(plotdf, newData_avg)
+
+library(ggplot2)
+#GENERATING KEY FIGURES IN THE PAPER
+#Creating Figure Showing Predicted Probabilities of Intra-EU Trade Share 
+sitc0 <- ggplot(plotdf, aes(y = fit, x = lagtradeshare0100)) + geom_smooth(method = NULL, span = 1) + geom_point() +  theme_bw() + ylim(-.05,1) + labs(y = "Predicted Probability of Sanctions Busting", x="Trade Share: Agricultural Goods (SITC 0)") + theme(panel.grid.major = element_line(colour = "gray", linetype = "dotted"), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.y = element_text(size=12, face="bold"), axis.title.x = element_text(size=12, face="bold")) 
+sitc0
+ggsave("sitc0.pdf")
+ggsave("sitc0_.jpg")
+beep()
+
+```
+```{r}
+#Generating Figures - SITC 0
+#Create tmpdat for predicted probability graphs
+tmpdat <- multi.sanctions.bust0.all@frame[, c("caseid", "lndist", "lnlaggdpt", "duration", "lagtradeshare0100",
+                                          "partnercode", "lnlaggdpp", "lagtradeopenP", "JointDem", "DefPactPT", "Dem_T", 
+                                          "Dem_3P", "lagtradecontrol0", "nobust0", "nobust0sq", "nobust0cb")]
+
+library(merTools)
+#Use this data to compute all the graphs using all data as observed
+newData <- tmpdat
+
+#newData_avg <- draw(multi.sanctions.bust0.all, type = "average")
+#newData_avg <- wiggle(newData_avg, var = "lagtradeshare0100", 
+#               valueslist = list(unique(tmpdat$lagtradeshare0100)))
+
+#Bootstrap the Prediction Intervals and Predicted Probabilities
+plotdf <- predictInterval(multi.sanctions.bust0.all, newdata = newData, type = "probability", 
+            stat = "mean", n.sims = 20000, level = 0.95, which = "full", seed = 234, include.resid.var = FALSE)
+plotdf <- cbind(plotdf, newData)
+
+library(ggplot2)
+#GENERATING KEY FIGURES IN THE PAPER
+#Creating Figure Showing Predicted Probabilities of Intra-EU Trade Share 
+sitc0all <- ggplot(plotdf, aes(y = fit, x = lagtradeshare0100)) + geom_smooth(method = "lm", span = 1) +  theme_bw() + ylim(-.05,1) + labs(y = "Predicted Probability of Sanctions Busting", x="Trade Share: Agricultural Goods (SITC 0): Food and live animals") + theme(panel.grid.major = element_line(colour = "gray", linetype = "dotted"), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.y = element_text(size=12, face="bold"), axis.title.x = element_text(size=12, face="bold")) 
+sitc0all
+ggsave("sitc0_all.pdf")
+ggsave("sitc0_all.jpg")
+beep()
+
+#Generating Figures - SITC 1
+#Create tmpdat for predicted probability graphs
+tmpdat1 <- multi.sanctions.bust1.all@frame[, c("caseid", "lndist", "lnlaggdpt", "duration", "lagtradeshare1100",
+                                          "partnercode", "lnlaggdpp", "lagtradeopenP", "JointDem", "DefPactPT", "Dem_T", 
+                                          "Dem_3P", "lagtradecontrol1", "nobust1", "nobust1sq", "nobust1cb")]
+
+#Use this data to compute all the graphs using all data as observed
+newData1 <- tmpdat1
+
+#newData_avg <- draw(multi.sanctions.bust0.all, type = "average")
+#newData_avg <- wiggle(newData_avg, var = "lagtradeshare0100", 
+#               valueslist = list(unique(tmpdat$lagtradeshare0100)))
+
+#Bootstrap the Prediction Intervals and Predicted Probabilities
+plotdf1 <- predictInterval(multi.sanctions.bust1.all, newdata = newData1, type = "probability", 
+            stat = "mean", n.sims = 20000, level = 0.95, which = "full", seed = 234, include.resid.var = FALSE)
+plotdf1 <- cbind(plotdf1, newData1)
+
+#GENERATING KEY FIGURES IN THE PAPER
+#Creating Figure Showing Predicted Probabilities of Intra-EU Trade Share 
+sitc1all <- ggplot(plotdf1, aes(y = fit, x = lagtradeshare1100)) + geom_smooth(method = "lm", span = 1) +  theme_bw() + ylim(-.05,1) + labs(y = "Predicted Probability of Sanctions Busting", x="Trade Share (SITC 1): Beverages and tobacco products") + theme(panel.grid.major = element_line(colour = "gray", linetype = "dotted"), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.y = element_text(size=12, face="bold"), axis.title.x = element_text(size=12, face="bold")) 
+sitc1all
+ggsave("sitc1_all.pdf")
+ggsave("sitc1_all.jpg")
+beep()
+
+#SITC 2 - trade share
+#Create tmpdat for predicted probability graphs
+tmpdat2 <- multi.sanctions.bust2.all@frame[, c("caseid", "lndist", "lnlaggdpt", "duration", "lagtradeshare2100",
+                                          "partnercode", "lnlaggdpp", "lagtradeopenP", "JointDem", "DefPactPT", "Dem_T", 
+                                          "Dem_3P", "lagtradecontrol2", "nobust2", "nobust2sq", "nobust2cb")]
+
+#Use this data to compute all the graphs using all data as observed
+newData2 <- tmpdat2
+
+#newData_avg <- draw(multi.sanctions.bust0.all, type = "average")
+#newData_avg <- wiggle(newData_avg, var = "lagtradeshare0100", 
+#               valueslist = list(unique(tmpdat$lagtradeshare0100)))
+
+#Bootstrap the Prediction Intervals and Predicted Probabilities
+plotdf2 <- predictInterval(multi.sanctions.bust2.all, newdata = newData2, type = "probability", 
+            stat = "mean", n.sims = 20000, level = 0.95, which = "full", seed = 234, include.resid.var = FALSE)
+plotdf2 <- cbind(plotdf2, newData2)
+
+#GENERATING KEY FIGURES IN THE PAPER
+#Creating Figure Showing Predicted Probabilities of Intra-EU Trade Share 
+sitc2all <- ggplot(plotdf2, aes(y = fit, x = lagtradeshare2100)) + geom_smooth(method = "lm", span = 1) +  theme_bw() + ylim(-.05,1) + labs(y = "Predicted Probability of Sanctions Busting", x="Trade Share (SITC 2): Hides, skins, oil seeds, crude materials") + theme(panel.grid.major = element_line(colour = "gray", linetype = "dotted"), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.y = element_text(size=12, face="bold"), axis.title.x = element_text(size=12, face="bold")) 
+sitc2all
+ggsave("sitc2_all.pdf")
+ggsave("sitc2_all.jpg")
+beep()
+
+#SITC 3 - trade share
+#Create tmpdat for predicted probability graphs
+tmpdat3 <- multi.sanctions.bust3.all@frame[, c("caseid", "lndist", "lnlaggdpt", "duration", "lagtradeshare3100",
+                                          "partnercode", "lnlaggdpp", "lagtradeopenP", "JointDem", "DefPactPT", "Dem_T", 
+                                          "Dem_3P", "lagtradecontrol3", "nobust3", "nobust3sq", "nobust3cb")]
+
+#Use this data to compute all the graphs using all data as observed
+newData3 <- tmpdat3
+
+#newData_avg <- draw(multi.sanctions.bust0.all, type = "average")
+#newData_avg <- wiggle(newData_avg, var = "lagtradeshare0100", 
+#               valueslist = list(unique(tmpdat$lagtradeshare0100)))
+
+#Bootstrap the Prediction Intervals and Predicted Probabilities
+plotdf3 <- predictInterval(multi.sanctions.bust3.all, newdata = newData3, type = "probability", 
+            stat = "mean", n.sims = 20000, level = 0.95, which = "full", seed = 234, include.resid.var = FALSE)
+plotdf3 <- cbind(plotdf3, newData3)
+
+#GENERATING KEY FIGURES IN THE PAPER
+#Creating Figure Showing Predicted Probabilities of Intra-EU Trade Share 
+sitc3all <- ggplot(plotdf3, aes(y = fit, x = lagtradeshare3100)) + geom_smooth(method = "lm", span = 1) +  theme_bw() + ylim(-.05,1) + labs(y = "Predicted Probability of Sanctions Busting", x="Trade Share (SITC 3): Mineral fuels (crude oil, coal) and lubricants") + theme(panel.grid.major = element_line(colour = "gray", linetype = "dotted"), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.y = element_text(size=12, face="bold"), axis.title.x = element_text(size=12, face="bold")) 
+sitc3all
+ggsave("sitc3_all.pdf")
+ggsave("sitc3_all.jpg")
+beep()
+
+#SITC 4 - trade share
+#Create tmpdat for predicted probability graphs
+tmpdat4 <- multi.sanctions.bust4a.all@frame[, c("caseid", "lndist", "lnlaggdpt", "duration", "lagtradeshare4100",
+                                          "partnercode", "lnlaggdpp", "lagtradeopenP", "JointDem", "DefPactPT", "Dem_T", 
+                                          "Dem_3P", "lagtradecontrol4", "nobust4", "nobust4sq", "nobust4cb")]
+
+#Use this data to compute all the graphs using all data as observed
+newData4 <- tmpdat4
+
+#newData_avg <- draw(multi.sanctions.bust0.all, type = "average")
+#newData_avg <- wiggle(newData_avg, var = "lagtradeshare0100", 
+#               valueslist = list(unique(tmpdat$lagtradeshare0100)))
+
+#Bootstrap the Prediction Intervals and Predicted Probabilities
+plotdf4 <- predictInterval(multi.sanctions.bust4a.all, newdata = newData4, type = "probability", 
+            stat = "mean", n.sims = 20000, level = 0.95, which = "full", seed = 234, include.resid.var = FALSE)
+plotdf4 <- cbind(plotdf4, newData4)
+
+#GENERATING KEY FIGURES IN THE PAPER
+#Creating Figure Showing Predicted Probabilities of Intra-EU Trade Share 
+sitc4all <- ggplot(plotdf4, aes(y = fit, x = lagtradeshare4100)) + geom_smooth(method = "lm", span = 1) +  theme_bw() + ylim(-.05,1) + labs(y = "Predicted Probability of Sanctions Busting", x="Trade Share (SITC 4): Animal and vegetable oils/fats") + theme(panel.grid.major = element_line(colour = "gray", linetype = "dotted"), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.y = element_text(size=12, face="bold"), axis.title.x = element_text(size=12, face="bold")) 
+sitc4all
+ggsave("sitc4_all.pdf")
+ggsave("sitc4_all.jpg")
+beep()
+
+#SITC 5 - trade share
+#Create tmpdat for predicted probability graphs
+tmpdat5 <- multi.sanctions.bust5.all@frame[, c("caseid", "lndist", "lnlaggdpt", "duration", "lagtradeshare5100",
+                                          "partnercode", "lnlaggdpp", "lagtradeopenP", "JointDem", "DefPactPT", "Dem_T", 
+                                          "Dem_3P", "lagtradecontrol5", "nobust5", "nobust5sq", "nobust5cb")]
+
+#Use this data to compute all the graphs using all data as observed
+newData5 <- tmpdat5
+
+#newData_avg <- draw(multi.sanctions.bust0.all, type = "average")
+#newData_avg <- wiggle(newData_avg, var = "lagtradeshare0100", 
+#               valueslist = list(unique(tmpdat$lagtradeshare0100)))
+
+#Bootstrap the Prediction Intervals and Predicted Probabilities
+plotdf5 <- predictInterval(multi.sanctions.bust5.all, newdata = newData5, type = "probability", 
+            stat = "mean", n.sims = 20000, level = 0.95, which = "full", seed = 234, include.resid.var = FALSE)
+plotdf5 <- cbind(plotdf5, newData5)
+
+#GENERATING KEY FIGURES IN THE PAPER
+#Creating Figure Showing Predicted Probabilities of Intra-EU Trade Share 
+sitc5all <- ggplot(plotdf5, aes(y = fit, x = lagtradeshare5100)) + geom_smooth(method = "lm", span = 1) +  theme_bw() + ylim(-.05,1) + labs(y = "Predicted Probability of Sanctions Busting", x="Trade Share (SITC 5): Chemicals and fertilizers") + theme(panel.grid.major = element_line(colour = "gray", linetype = "dotted"), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.y = element_text(size=12, face="bold"), axis.title.x = element_text(size=12, face="bold")) 
+sitc5all
+ggsave("sitc5_all.pdf")
+ggsave("sitc5_all.jpg")
+beep()
+
+#SITC 6 - trade share
+#Create tmpdat for predicted probability graphs
+tmpdat6 <- multi.sanctions.bust6.all@frame[, c("caseid", "lndist", "lnlaggdpt", "duration", "lagtradeshare6100",
+                                          "partnercode", "lnlaggdpp", "lagtradeopenP", "JointDem", "DefPactPT", "Dem_T", 
+                                          "Dem_3P", "lagtradecontrol6", "nobust6", "nobust6sq", "nobust6cb")]
+
+#Use this data to compute all the graphs using all data as observed
+newData6 <- tmpdat6
+
+#newData_avg <- draw(multi.sanctions.bust0.all, type = "average")
+#newData_avg <- wiggle(newData_avg, var = "lagtradeshare0100", 
+#               valueslist = list(unique(tmpdat$lagtradeshare0100)))
+
+#Bootstrap the Prediction Intervals and Predicted Probabilities
+plotdf6 <- predictInterval(multi.sanctions.bust6.all, newdata = newData6, type = "probability", 
+            stat = "mean", n.sims = 20000, level = 0.95, which = "full", seed = 234, include.resid.var = FALSE)
+plotdf6 <- cbind(plotdf6, newData6)
+
+#GENERATING KEY FIGURES IN THE PAPER
+#Creating Figure Showing Predicted Probabilities of Intra-EU Trade Share 
+sitc6all <- ggplot(plotdf6, aes(y = fit, x = lagtradeshare6100)) + geom_smooth(method = "lm", span = 1) +  theme_bw() + ylim(-.05,1) + labs(y = "Predicted Probability of Sanctions Busting", x="Trade Share (SITC 6): Material manufactures") + theme(panel.grid.major = element_line(colour = "gray", linetype = "dotted"), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.y = element_text(size=12, face="bold"), axis.title.x = element_text(size=12, face="bold")) 
+sitc6all
+ggsave("sitc6_all.pdf")
+ggsave("sitc6_all.jpg")
+beep()
+
+#SITC 7 - trade share
+#Create tmpdat for predicted probability graphs
+tmpdat7 <- multi.sanctions.bust7.all@frame[, c("caseid", "lndist", "lnlaggdpt", "duration", "lagtradeshare7100",
+                                          "partnercode", "lnlaggdpp", "lagtradeopenP", "JointDem", "DefPactPT", "Dem_T", 
+                                          "Dem_3P", "lagtradecontrol7", "nobust7", "nobust7sq", "nobust7cb")]
+
+#Use this data to compute all the graphs using all data as observed
+newData7 <- tmpdat7
+
+#newData_avg <- draw(multi.sanctions.bust0.all, type = "average")
+#newData_avg <- wiggle(newData_avg, var = "lagtradeshare0100", 
+#               valueslist = list(unique(tmpdat$lagtradeshare0100)))
+
+#Bootstrap the Prediction Intervals and Predicted Probabilities
+plotdf7 <- predictInterval(multi.sanctions.bust7.all, newdata = newData7, type = "probability", 
+            stat = "mean", n.sims = 20000, level = 0.95, which = "full", seed = 234, include.resid.var = FALSE)
+plotdf7 <- cbind(plotdf7, newData7)
+
+#GENERATING KEY FIGURES IN THE PAPER
+#Creating Figure Showing Predicted Probabilities of Intra-EU Trade Share 
+sitc7all <- ggplot(plotdf7, aes(y = fit, x = lagtradeshare7100)) + geom_smooth(method = "lm", span = 1) +  theme_bw() + ylim(-.05,1) + labs(y = "Predicted Probability of Sanctions Busting", x="Trade Share (SITC 7): Machinery, transport equipment, hi-tech goods") + theme(panel.grid.major = element_line(colour = "gray", linetype = "dotted"), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.y = element_text(size=12, face="bold"), axis.title.x = element_text(size=12, face="bold")) 
+sitc7all
+ggsave("sitc7_all.pdf")
+ggsave("sitc7_all.jpg")
+beep()
+
+#SITC 8 - trade share
+#Create tmpdat for predicted probability graphs
+tmpdat8 <- multi.sanctions.bust8.all@frame[, c("caseid", "lndist", "lnlaggdpt", "duration", "lagtradeshare8100",
+                                          "partnercode", "lnlaggdpp", "lagtradeopenP", "JointDem", "DefPactPT", "Dem_T", 
+                                          "Dem_3P", "lagtradecontrol8", "nobust8", "nobust8sq", "nobust8cb")]
+
+#Use this data to compute all the graphs using all data as observed
+newData8 <- tmpdat8
+
+#newData_avg <- draw(multi.sanctions.bust0.all, type = "average")
+#newData_avg <- wiggle(newData_avg, var = "lagtradeshare0100", 
+#               valueslist = list(unique(tmpdat$lagtradeshare0100)))
+
+#Bootstrap the Prediction Intervals and Predicted Probabilities
+plotdf8 <- predictInterval(multi.sanctions.bust8.all, newdata = newData8, type = "probability", 
+            stat = "mean", n.sims = 20000, level = 0.95, which = "full", seed = 234, include.resid.var = FALSE)
+plotdf8 <- cbind(plotdf8, newData8)
+
+#GENERATING KEY FIGURES IN THE PAPER
+#Creating Figure Showing Predicted Probabilities of Intra-EU Trade Share 
+sitc8all <- ggplot(plotdf8, aes(y = fit, x = lagtradeshare8100)) + geom_smooth(method = "lm", span = 1) +  theme_bw() + ylim(-.05,1) + labs(y = "Predicted Probability of Sanctions Busting", x="Trade Share (SITC 8): Furniture, apparel, footwear, professional instruments") + theme(panel.grid.major = element_line(colour = "gray", linetype = "dotted"), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.y = element_text(size=12, face="bold"), axis.title.x = element_text(size=12, face="bold")) 
+sitc8all
+ggsave("sitc8_all.pdf")
+ggsave("sitc8_all.jpg")
+beep()
+
+#SITC 9 - trade share
+#Create tmpdat for predicted probability graphs
+tmpdat9 <- multi.sanctions.bust9.all@frame[, c("caseid", "lndist", "lnlaggdpt", "duration", "lagtradeshare9100",
+                                          "partnercode", "lnlaggdpp", "lagtradeopenP", "JointDem", "DefPactPT", "Dem_T", 
+                                          "Dem_3P", "lagtradecontrol9", "nobust9", "nobust9sq", "nobust9cb")]
+
+#Use this data to compute all the graphs using all data as observed
+newData9 <- tmpdat9
+
+#newData_avg <- draw(multi.sanctions.bust0.all, type = "average")
+#newData_avg <- wiggle(newData_avg, var = "lagtradeshare0100", 
+#               valueslist = list(unique(tmpdat$lagtradeshare0100)))
+
+#Bootstrap the Prediction Intervals and Predicted Probabilities
+plotdf9 <- predictInterval(multi.sanctions.bust9.all, newdata = newData9, type = "probability", 
+            stat = "mean", n.sims = 20000, level = 0.95, which = "full", seed = 234, include.resid.var = FALSE)
+plotdf9 <- cbind(plotdf9, newData9)
+
+#GENERATING KEY FIGURES IN THE PAPER
+#Creating Figure Showing Predicted Probabilities of Intra-EU Trade Share 
+sitc9all <- ggplot(plotdf9, aes(y = fit, x = lagtradeshare9100)) + geom_smooth(method = "lm", span = 1) +  theme_bw() + ylim(-.05,1) + labs(y = "Predicted Probability of Sanctions Busting", x="Trade Share (SITC 9): Uncategorized Goods") + theme(panel.grid.major = element_line(colour = "gray", linetype = "dotted"), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.title.y = element_text(size=12, face="bold"), axis.title.x = element_text(size=12, face="bold")) 
+sitc9all
+ggsave("sitc9_all.pdf")
+ggsave("sitc9_all.jpg")
+beep()
+```
